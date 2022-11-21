@@ -1,21 +1,38 @@
-version: '3'
+volumes:
+  database:
+  database_config:
 
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-14}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-    volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
 
-volumes:
-###> doctrine/doctrine-bundle ###
-  db-data:
-###< doctrine/doctrine-bundle ###
+  database:
+    image: mariadb:10.9.3
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - database:/var/lib/mysql
+      - database_config:/etc/mysql
+
+  # if you need to disable the debugger within the container, just prepend your PHP commands with XDEBUG_MODE=off 
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/dev.Dockerfile
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./var:/var/www/var/
+    ports:
+      # not using the Symfony TLS built-in server here
+      - 80:80
+
+  phpmyadmin:
+      image: phpmyadmin:latest
+      restart: unless-stopped
+      ports:
+          - 8080:80
+      environment:
+          # we specify that we connect to an arbitrary server with the flag below
+          # "arbitrary" means you're able to specify which database server to use on login page of phpmyadmin      
+          - PMA_ARBITRARY=1
