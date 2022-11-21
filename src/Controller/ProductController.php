@@ -20,17 +20,11 @@ class ProductController extends AbstractController
     }
 
     #[Route('/products/{id}', name: 'app_product')]
-    public function show(Product $product, OfferRepository $offerRepository, PriceCalculator $priceCalculator): Response
+    public function show(Product $product, PriceCalculator $priceCalculator): Response
     {
-        // die(date('z'));
-        $usr = $this->getUser();
-
-        $todaysOffer = $offerRepository->findSpecialOfferForToday();
-        $usrDiscount = floatval($usr->{'getLoyaltyDiscount'}());
-
         return $this->render('product/show.html.twig', [
             'product' => $product,
-            'price' => $priceCalculator->personalPrice($usr, $product, $todaysOffer)
+            'price' => $priceCalculator->personalPrice($this->getUser(), $product)
         ]);
     }
 }

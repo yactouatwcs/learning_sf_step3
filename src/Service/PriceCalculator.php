@@ -15,7 +15,7 @@ class PriceCalculator
 
     public function personalPrice(User $user, Product $product): float
     {
-        $currentUserDiscount = $user->getLoyaltyDiscount();
+        $currentUserDiscount = floatval($user->getLoyaltyDiscount());
         $todaysDiscount = floatval($this->offerRepository->findSpecialOfferForToday()->getDiscount()) ?? 1;
         return $product->getPrice() * min($currentUserDiscount, $todaysDiscount);
     }
