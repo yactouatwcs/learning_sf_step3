@@ -19,7 +19,7 @@ class ProductController extends AbstractController
         ]);
     }
 
-    #[Route('/products/{id}', name: 'app_product')]
+    #[Route('/products/{id}', name: 'app_product_show')]
     public function show(Product $product, PriceCalculator $priceCalculator): Response
     {
         return $this->render('product/show.html.twig', [
